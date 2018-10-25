@@ -21,6 +21,7 @@
 <div id="map"></div>
 <input type="button" value="Load 1st GeoJSON" onclick="fetchGeoJson(firstGeoJson)">
 <input type="button" value="Load 2nd GeoJSON" onclick="fetchGeoJson(secondGeoJson)">
+<input type="button" value="Get bbox coordinates" onclick="getBboxCoordinates()">
 
 <script>
 
@@ -198,6 +199,16 @@ function fetchGeoJson(inputGeoJson) {
   mymap.fitBounds(jsonLayer.getBounds());
 }
 
+function getBboxCoordinates() {
+  console.log("Current zoom level: " +mymap.getZoom());
+  var bounds = mymap.getBounds();
+  var bbox = bounds.getSouthWest().lat + ',' +
+             bounds.getSouthWest().lng + ',' +
+             bounds.getNorthEast().lat + ',' +
+             bounds.getNorthEast().lng;
+
+  console.log("bbox: " +bbox);
+}
 </script>
 
 </body>
