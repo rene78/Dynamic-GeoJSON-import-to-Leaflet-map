@@ -44,76 +44,84 @@
 
 <script>
   var firstGeoJson={
-    "type": "FeatureCollection",
-    "features": [
-      {
-        "type": "Feature",
-        "properties": {
-          "wikidata": "Q1111"
-        },
-        "geometry": {
-          "type": "Polygon",
-          "coordinates": [
-            [
-              [
-                8.305041790008543,
-                47.47982379965097
-              ],
-              [
-                8.305299282073975,
-                47.4792799657154
-              ],
-              [
-                8.306259512901306,
-                47.47946486988508
-              ],
-              [
-                8.305943012237549,
-                47.48000870190672
-              ],
-              [
-                8.305041790008543,
-                47.47982379965097
-              ]
-            ]
-          ]
-        }
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "admin_level": 1
       },
-      {
-        "type": "Feature",
-        "properties": {
-          "wikidata": "Q2222"
-        },
-        "geometry": {
-          "type": "Polygon",
-          "coordinates": [
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
             [
-              [
-                8.305020332336426,
-                47.47986730612262
-              ],
-              [
-                8.305964469909668,
-                47.480037706123106
-              ],
-              [
-                8.30590009689331,
-                47.48016097386403
-              ],
-              [
-                8.304730653762817,
-                47.48050902239492
-              ],
-              [
-                8.305020332336426,
-                47.47986730612262
-              ]
+              8.305878639221191,
+              47.48033499841769
+            ],
+            [
+              8.30742359161377,
+              47.478710746833485
+            ],
+            [
+              8.311071395874023,
+              47.47995794448956
+            ],
+            [
+              8.310105800628662,
+              47.482220227468304
+            ],
+            [
+              8.308131694793701,
+              47.48220572596455
+            ],
+            [
+              8.305878639221191,
+              47.48033499841769
             ]
           ]
-        }
+        ]
       }
-    ]
-  };
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "admin_level": 2
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8.30765962600708,
+              47.48079906107601
+            ],
+            [
+              8.305299282073975,
+              47.47791310490395
+            ],
+            [
+              8.308753967285156,
+              47.47485294807404
+            ],
+            [
+              8.312294483184814,
+              47.47705743919014
+            ],
+            [
+              8.312294483184814,
+              47.482147719909584
+            ],
+            [
+              8.30765962600708,
+              47.48079906107601
+            ]
+          ]
+        ]
+      }
+    }
+  ]
+};
   var BadenGeoJson={
   "type": "FeatureCollection",
   "features": [
@@ -1288,37 +1296,33 @@
   ]
 }
   var jsonLayer;
+  var osmTiles;
   var mymap;
 
   //Add the base map without any layers.
   addLeafletMap();
 
-  //Select/deselect all
-  function selectAll() {
-    var allcheckboxes = document.getElementsByName("admin-levels");
-    var allseldesel = document.getElementById("all-sel");
-
-    for (i=0; i<allcheckboxes.length; i++) {
-      allcheckboxes[i].checked = allseldesel.checked;
-    }
-  }
-
-  //Hide all polygons
-  function hidePolygons() {
-    jsonLayer.eachLayer(function (layer) {
-    //console.log(layer.feature.properties.wikidata);
-    layer.setStyle({color: 'rgba(0,0,0,0)'})
-    });
-  }
-
   //Add a Leaflet map to the page
   function addLeafletMap() {
     mymap = L.map('map').setView([0, 0], 1);
 
-    L.tileLayer('https://a.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    osmTiles = L.tileLayer('https://a.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>',
     maxZoom: 18
     }).addTo(mymap);
+  }
+
+  //Show GeoJSON polygons on the Leaflet map
+  function showGeoJson(inputGeoJson) {
+    jsonLayer = L.geoJSON(inputGeoJson, {
+      onEachFeature: onEachFeature,
+      style: style
+    })
+
+    jsonLayer.addTo(mymap);
+
+    //Center and zoom the map on the provided GeoJSON
+    mymap.fitBounds(jsonLayer.getBounds());
   }
 
   //Apply standard colors to the polygons (all objects or "features" are forwarded to this function)
@@ -1328,13 +1332,13 @@
     return {"fillColor": undefined, "opacity": 1, "fillOpacity": 0.7, "color": "#555555", "weight": 2};
   }
 
-  //Color polygon according to selected district
+  //Color polygon red
   function onEachFeature(feature, layer) {
     //bind click
     layer.on('click', function (e) {
       //e=event
       //console.log(e);
-      //console.log(feature.properties.title);
+      //console.log(feature.properties);
       //console.log("Anzahl der Koordinaten: " +feature.geometry.coordinates[0].length);
       //console.log("Hier sind die Koordinaten gespeichert: " +feature.geometry.coordinates[0][0][0]);
       //createMapmask(feature);
@@ -1354,19 +1358,6 @@
 
       //console.log("Wikidata ID: " +feature.properties.wikidata);
     });
-  }
-
-  //Show GeoJSON polygons on the Leaflet map
-  function showGeoJson(inputGeoJson) {
-    jsonLayer = L.geoJSON(inputGeoJson, {
-      onEachFeature: onEachFeature,
-      style: style
-    })
-
-    jsonLayer.addTo(mymap);
-
-    //Center and zoom the map on the provided GeoJSON
-    mymap.fitBounds(jsonLayer.getBounds());
   }
 
   function getBboxCoordinates() {
@@ -1413,6 +1404,23 @@
     return response;
   }
 
+  //Select/deselect all
+  function selectAll() {
+    var allcheckboxes = document.getElementsByName("admin-levels");
+    var allseldesel = document.getElementById("all-sel");
+
+    for (i=0; i<allcheckboxes.length; i++) {
+      allcheckboxes[i].checked = allseldesel.checked;
+    }
+  }
+
+  //Hide all polygons (Make transparent is not the right way because the polygon is still clickable)
+  function hidePolygons() {
+    jsonLayer.eachLayer(function (layer) {
+    //console.log(layer.feature.properties.wikidata);
+    layer.setStyle({color: 'rgba(0,0,0,0)'})
+    });
+  }
 </script>
 
 </body>
