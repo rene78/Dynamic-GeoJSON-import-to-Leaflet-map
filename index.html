@@ -12741,7 +12741,7 @@
     var searchQuery = '[out:json][timeout:25];(relation["admin_level"~""][wikidata~""]('+bbox+'););out body;>;out skel qt;'
     console.log("Paste to overpass turbo for debugging purposes: "+searchQuery);
     var searchQueryEnc = encodeURIComponent(searchQuery);
-    var apiUrl = "http://overpass-api.de/api/interpreter?data=" + searchQueryEnc;
+    var apiUrl = "https://overpass-api.de/api/interpreter?data=" + searchQueryEnc;
     console.log(apiUrl);
 
     fetch(apiUrl)
