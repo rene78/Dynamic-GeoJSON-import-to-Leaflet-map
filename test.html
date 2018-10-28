@@ -114,9 +114,9 @@
 
 var adminLevels = [
   {name:"nothing", elements:undefined},
-  {name:"admin_level 1", elements:undefined},
-  {name:"admin_level 2", elements:undefined},
-  {name:"admin_level 3", elements:undefined},
+  {name:"Admin Level 1", elements:undefined},
+  {name:"Admin Level 2", elements:undefined},
+  {name:"Admin Level 3", elements:undefined},
 ];
 
     /* 1 */
@@ -165,18 +165,13 @@ var adminLevels = [
     //Only show layer controls for layers with elements in them
     for (var i = 1; i < adminLevels.length; i++) {
       if (adminLevels[i].elements != undefined) {
-        key = "Admin level " + i;
+        key = adminLevels[i].name;
         val = adminLevels[i].elements;
         layerControl[key] = val;
         //console.log(layerControl);
       }
     }
-
-    let layerControl1 = {
-      "Admin level 1": layerAdminL1, // an option to show or hide the layer you created from geojson
-      "Admin level 2": layerAdminL2, // an option to show or hide the layer you created from geojson
-      "Admin level 3": layerAdminL3, // an option to show or hide the layer you created from geojson
-    }
+    console.log(layerControl);
 
     /* 5 */
     // Add the control component, a layer list with checkboxes for operational layers and radio buttons for basemaps
