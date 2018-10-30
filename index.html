@@ -21,9 +21,9 @@
 </head>
 <body>
 <div id="map"></div>
-<!-- <input type="button" value="Load 1st GeoJSON" onclick="showGeoJson(firstGeoJson)">
+<!-- <input type="button" value="Load 1st GeoJSON" onclick="showGeoJson(firstGeoJson)"> -->
 <input type="button" value="Load Baden GeoJSON" onclick="showGeoJson(BadenKomplett)">
-<input type="button" value="Get bbox coordinates" onclick="getBboxCoordinates()"> -->
+<!-- <input type="button" value="Get bbox coordinates" onclick="getBboxCoordinates()"> -->
 <input type="button" value="Load GeoJSON from Overpass" onclick="fetchExternalGeojson()">
 <br>
 
@@ -12706,7 +12706,8 @@
     });
 
     //add GeoJSON elements to layer
-    var admin_level = feature.properties.tags.admin_level; //subelement "tags" only for geojson from overpass api.
+    var admin_level = feature.properties.admin_level;
+    //var admin_level = feature.properties.tags.admin_level; //subelement "tags" only for geojson from overpass api.
 
     switch (admin_level) {
       case "1": adminLevels[admin_level].elements = layerAdminL1.addLayer( layer ); break; //add polygon to adminLevels[0]
