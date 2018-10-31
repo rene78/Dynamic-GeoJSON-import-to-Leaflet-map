@@ -12610,6 +12610,9 @@
   //Add the base map without any layers.
   addLeafletMap();
 
+  //for developing add geojson straight away
+  //showGeoJson(BadenKomplett);
+
   //Add a Leaflet map to the page
   function addLeafletMap() {
     mymap = L.map('map').setView([0, 0], 1);
@@ -12637,7 +12640,8 @@
   function showGeoJson(inputGeoJson) {
     jsonLayer = L.geoJSON(inputGeoJson, {
       onEachFeature: onEachFeature,
-      style: style
+      style: style,
+      filter: filterPoints
     })
 
     jsonLayer.addTo(mymap);
@@ -12684,30 +12688,17 @@
     layer.on('click', function (e) {
       //e=event
       //console.log(e);
-      //console.log(feature.properties);
-      //console.log("Anzahl der Koordinaten: " +feature.geometry.coordinates[0].length);
-      //console.log("Hier sind die Koordinaten gespeichert: " +feature.geometry.coordinates[0][0][0]);
-      //createMapmask(feature);
-      //console.log(layer);
-      //console.log(layer.options.fillColor);
-      //var check=layer.options.fillColor === definePolygonColor(feature);
-      //console.log(check);
-
-      /*Check, if the polygon already has a color defined.
-      If no OR
-      If current color is a different one than the one, which is supposed to be applied:
-      --> Color the polygon according to the selected district.
-      Else if (i.e. color already defined): Remove the color again. Behaves like on/off toggle
-      */
-
+      
       layer.setStyle({fillColor: "red"});
-
-      //console.log("Wikidata ID: " +feature.properties.wikidata);
+      //var node = feature;
+      
+      //var node = layer.feature.geometry;
+      //console.log(node);
     });
 
     //add GeoJSON elements to layer
-    var admin_level = feature.properties.admin_level;
-    //var admin_level = feature.properties.tags.admin_level; //subelement "tags" only for geojson from overpass api.
+    //var admin_level = feature.properties.admin_level;
+    var admin_level = feature.properties.tags.admin_level; //subelement "tags" only for geojson from overpass api.
 
     switch (admin_level) {
       case "1": adminLevels[admin_level].elements = layerAdminL1.addLayer( layer ); break; //add polygon to adminLevels[0]
@@ -12721,6 +12712,16 @@
       case "9": adminLevels[admin_level].elements = layerAdminL9.addLayer( layer ); break;
       case "10": adminLevels[admin_level].elements = layerAdminL10.addLayer( layer ); break;
       case "11": adminLevels[admin_level].elements = layerAdminL11.addLayer( layer ); break;
+    }
+  }
+
+//Filter out all the label points from GeoJSON so the map doesn't look so messy.
+  function filterPoints(layer) {
+    //console.log(layer);
+
+    if (layer.geometry.type != "Point") {
+      //console.log(layer);
+      return true;
     }
   }
 
