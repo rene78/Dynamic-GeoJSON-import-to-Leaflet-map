@@ -12589,6 +12589,8 @@
   var jsonLayer;
   var osmTiles;
   var mymap;
+  var osmIdsArray = [];
+  var exclusionList="";
 
   var adminLevels = [
     {name:"nothing", elements:undefined},
@@ -12686,14 +12688,10 @@
   function onEachFeature(feature, layer) {
     //bind click
     layer.on('click', function (e) {
+      layer.setStyle({fillColor: "red"});
       //e=event
       //console.log(e);
-      
-      layer.setStyle({fillColor: "red"});
-      //var node = feature;
-      
-      //var node = layer.feature.geometry;
-      //console.log(node);
+      //console.log(layer.feature.geometry);
     });
 
     //add GeoJSON elements to layer
@@ -12713,15 +12711,31 @@
       case "10": adminLevels[admin_level].elements = layerAdminL10.addLayer( layer ); break;
       case "11": adminLevels[admin_level].elements = layerAdminL11.addLayer( layer ); break;
     }
+
+    //Write all relation id's into an array
+
+    //for local GeoJSON
+    //var osmId = feature.properties["@id"];
+    //osmId = osmId.replace( /^\D+/g, '');
+    //console.log(osmId);
+    //osmIdsArray.push(osmId);
+
+    //for GeoJSON's from overpass and osmtogeojson
+    var osmId = feature.properties.id;
+
+    if (osmIdsArray.includes(osmId)==false) {
+      osmIdsArray.push(osmId);
+    }
+    //console.log(osmIdsArray);
   }
 
-//Filter out all the label points from GeoJSON so the map doesn't look so messy.
+  //Filter out all the label points from GeoJSON so the map doesn't look so messy.
   function filterPoints(layer) {
     //console.log(layer);
 
     if (layer.geometry.type != "Point") {
       //console.log(layer);
-      return true;
+      return true; //Show all elements which are NOT of type "Point"
     }
   }
 
@@ -12739,8 +12753,16 @@
   function fetchExternalGeojson() {
     var bbox = getBboxCoordinates(); //get bounding box from current map view
     //var bbox = "47.449,8.287,47.490,8.355"; //Some hardcoded values for bounding box for testing
-    //Overpass search query (first with hardcoded bounding box values)
-    var searchQuery = '[out:json][timeout:25];(relation["admin_level"~""][wikidata~""]('+bbox+'););out body;>;out skel qt;'
+
+    //make sure that polygons, which have already been loaded into the map, are excluded from the query
+    //only create exclusion list for subsequent queries (i.e. from 2nd query onwards)
+    if (osmIdsArray.length > 0) {
+      exclusionList = "- relation(id:" + osmIdsArray.join() + ");";
+    }
+    //console.log("Content of exclusion list: " +exclusionList);
+
+    //Overpass search query
+    var searchQuery = '[out:json][timeout:25];(relation["admin_level"]["wikidata"]('+bbox+');'+exclusionList+');out body;>;out skel qt;'
     console.log("Paste to overpass turbo for debugging purposes: "+searchQuery);
     var searchQueryEnc = encodeURIComponent(searchQuery);
     var apiUrl = "https://overpass-api.de/api/interpreter?data=" + searchQueryEnc;
@@ -12755,7 +12777,7 @@
       //console.log(overpassJson);
       //Convert JSON from overpass turbo into a proper GeoJSON
       var convGeoJson = osmtogeojson(overpassJson);
-      console.log(convGeoJson);
+      //console.log(convGeoJson);
       showGeoJson(convGeoJson);
     }).catch(function(error) {
       console.log("Something went wrong! " +error);
