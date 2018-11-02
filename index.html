@@ -23,7 +23,7 @@
 <div id="map"></div>
 <!-- <input type="button" value="Load 1st GeoJSON" onclick="showGeoJson(firstGeoJson)"> -->
 <input type="button" value="Load Baden GeoJSON" onclick="showGeoJson(BadenKomplett)">
-<!-- <input type="button" value="Get bbox coordinates" onclick="getBboxCoordinates()"> -->
+<input type="button" value="Toggle layer 6" onclick="hideShowLayer()">
 <input type="button" value="Load GeoJSON from Overpass" onclick="fetchExternalGeojson()">
 <br>
 
@@ -12591,6 +12591,7 @@
   var mymap;
   var osmIdsArray = [];
   var exclusionList="";
+  var layerControl;
 
   var adminLevels = [
     {name:"nothing", elements:undefined},
@@ -12607,12 +12608,12 @@
     {name:"Admin Level 11", elements:undefined}
   ];
 
-  var layerAdminL1, layerAdminL2, layerAdminL3, layerAdminL4, layerAdminL5, layerAdminL6, layerAdminL7, layerAdminL8, layerAdminL9, layerAdminL10;
+  //var layerAdminL1, layerAdminL2, layerAdminL3, layerAdminL4, layerAdminL5, layerAdminL6, layerAdminL7, layerAdminL8, layerAdminL9, layerAdminL10;
 
   //Add the base map without any layers.
   addLeafletMap();
 
-  //for developing add geojson straight away
+  //for development: add geojson straight away
   //showGeoJson(BadenKomplett);
 
   //Add a Leaflet map to the page
@@ -12625,131 +12626,20 @@
     }).addTo(mymap);
 
     // create operational layers that are empty for now
-    layerAdminL1 = L.layerGroup().addTo( mymap );
-    layerAdminL2 = L.layerGroup().addTo( mymap );
-    layerAdminL3 = L.layerGroup().addTo( mymap );
-    layerAdminL4 = L.layerGroup().addTo( mymap );
-    layerAdminL5 = L.layerGroup().addTo( mymap );
-    layerAdminL6 = L.layerGroup().addTo( mymap );
-    layerAdminL7 = L.layerGroup().addTo( mymap );
-    layerAdminL8 = L.layerGroup().addTo( mymap );
-    layerAdminL9 = L.layerGroup().addTo( mymap );
-    layerAdminL10 = L.layerGroup().addTo( mymap );
-    layerAdminL11 = L.layerGroup().addTo( mymap );
+    adminLevels[1].elements = L.layerGroup().addTo( mymap );//layerAdminL1 = L.layerGroup().addTo( mymap );
+    adminLevels[2].elements = L.layerGroup().addTo( mymap );//layerAdminL2 = L.layerGroup().addTo( mymap );
+    adminLevels[3].elements = L.layerGroup().addTo( mymap );//layerAdminL3 = L.layerGroup().addTo( mymap );
+    adminLevels[4].elements = L.layerGroup().addTo( mymap );//layerAdminL4 = L.layerGroup().addTo( mymap );
+    adminLevels[5].elements = L.layerGroup().addTo( mymap );//layerAdminL5 = L.layerGroup().addTo( mymap );
+    adminLevels[6].elements = L.layerGroup().addTo( mymap );//layerAdminL6 = L.layerGroup().addTo( mymap );
+    adminLevels[7].elements = L.layerGroup().addTo( mymap );//layerAdminL7 = L.layerGroup().addTo( mymap );
+    adminLevels[8].elements = L.layerGroup().addTo( mymap );//layerAdminL8 = L.layerGroup().addTo( mymap );
+    adminLevels[9].elements = L.layerGroup().addTo( mymap );//layerAdminL9 = L.layerGroup().addTo( mymap );
+    adminLevels[10].elements = L.layerGroup().addTo( mymap );//layerAdminL10 = L.layerGroup().addTo( mymap );
+    adminLevels[11].elements = L.layerGroup().addTo( mymap );//layerAdminL11 = L.layerGroup().addTo( mymap );
   }
 
-  //Show GeoJSON polygons on the Leaflet map
-  function showGeoJson(inputGeoJson) {
-    jsonLayer = L.geoJSON(inputGeoJson, {
-      onEachFeature: onEachFeature,
-      style: style,
-      filter: filterPoints
-    })
-
-    jsonLayer.addTo(mymap);
-
-    //Center and zoom the map on the provided GeoJSON
-    mymap.fitBounds(jsonLayer.getBounds());
-
-    // Define layer control elements on top right of map
-    var basemapControl = {
-      "OSM Tiles": osmTiles, // an option to select a basemap (makes more sense if you have multiple basemaps)
-    }
-
-    var layerControl={};
-    var key;
-    var val;
-
-    //console.log(adminLevels);
-    //Only show layer controls for layers with elements in them
-    for (var i = 1; i < adminLevels.length; i++) {
-      if (adminLevels[i].elements != undefined) {
-        key = adminLevels[i].name;
-        val = adminLevels[i].elements;
-        layerControl[key] = val;
-        //console.log(layerControl);
-      }
-    }
-
-    /* 5 */
-    // Add the control component, a layer list with checkboxes for operational layers and radio buttons for basemaps
-    L.control.layers( basemapControl, layerControl ).addTo( mymap )
-
-  }
-
-  //Apply standard colors to the polygons (all objects or "features" are forwarded to this function)
-  function style() {
-    //color = feature.properties.fill; 
-    //console.log(color);
-    return {"fillColor": undefined, "opacity": 1, "fillOpacity": 0.7, "color": "#555555", "weight": 2};
-  }
-
-  //Color polygon red
-  function onEachFeature(feature, layer) {
-    //bind click
-    layer.on('click', function (e) {
-      layer.setStyle({fillColor: "red"});
-      //e=event
-      //console.log(e);
-      //console.log(layer.feature.geometry);
-    });
-
-    //add GeoJSON elements to layer
-    //var admin_level = feature.properties.admin_level;
-    var admin_level = feature.properties.tags.admin_level; //subelement "tags" only for geojson from overpass api.
-
-    switch (admin_level) {
-      case "1": adminLevels[admin_level].elements = layerAdminL1.addLayer( layer ); break; //add polygon to adminLevels[0]
-      case "2": adminLevels[admin_level].elements = layerAdminL2.addLayer( layer ); break;
-      case "3": adminLevels[admin_level].elements = layerAdminL3.addLayer( layer ); break;
-      case "4": adminLevels[admin_level].elements = layerAdminL4.addLayer( layer ); break;
-      case "5": adminLevels[admin_level].elements = layerAdminL5.addLayer( layer ); break;
-      case "6": adminLevels[admin_level].elements = layerAdminL6.addLayer( layer ); break;
-      case "7": adminLevels[admin_level].elements = layerAdminL7.addLayer( layer ); break;
-      case "8": adminLevels[admin_level].elements = layerAdminL8.addLayer( layer ); break;
-      case "9": adminLevels[admin_level].elements = layerAdminL9.addLayer( layer ); break;
-      case "10": adminLevels[admin_level].elements = layerAdminL10.addLayer( layer ); break;
-      case "11": adminLevels[admin_level].elements = layerAdminL11.addLayer( layer ); break;
-    }
-
-    //Write all relation id's into an array
-
-    //for local GeoJSON
-    //var osmId = feature.properties["@id"];
-    //osmId = osmId.replace( /^\D+/g, '');
-    //console.log(osmId);
-    //osmIdsArray.push(osmId);
-
-    //for GeoJSON's from overpass and osmtogeojson
-    var osmId = feature.properties.id;
-
-    if (osmIdsArray.includes(osmId)==false) {
-      osmIdsArray.push(osmId);
-    }
-    //console.log(osmIdsArray);
-  }
-
-  //Filter out all the label points from GeoJSON so the map doesn't look so messy.
-  function filterPoints(layer) {
-    //console.log(layer);
-
-    if (layer.geometry.type != "Point") {
-      //console.log(layer);
-      return true; //Show all elements which are NOT of type "Point"
-    }
-  }
-
-  function getBboxCoordinates() {
-  console.log("Current zoom level: " +mymap.getZoom());
-  var bounds = mymap.getBounds();
-  var bbox = bounds.getSouthWest().lat + ',' +
-             bounds.getSouthWest().lng + ',' +
-             bounds.getNorthEast().lat + ',' +
-             bounds.getNorthEast().lng;
-  return bbox;
-  console.log("bbox: " +bbox);
-}
-
+  //download GeoJSON via overpass API and forward it to showGeoJson function
   function fetchExternalGeojson() {
     var bbox = getBboxCoordinates(); //get bounding box from current map view
     //var bbox = "47.449,8.287,47.490,8.355"; //Some hardcoded values for bounding box for testing
@@ -12792,7 +12682,155 @@
     return response;
   }
 
-  //Select/deselect all
+  //Show GeoJSON polygons on the Leaflet map & add layer control on top right of the map
+  function showGeoJson(inputGeoJson) {
+    jsonLayer = L.geoJSON(inputGeoJson, {
+      onEachFeature: onEachFeature,
+      style: style,
+      filter: filterPoints
+    })
+
+    jsonLayer.addTo(mymap);
+
+    //Center and zoom the map on the provided GeoJSON
+    mymap.fitBounds(jsonLayer.getBounds());
+
+    // Define layer control elements on top right of map
+    var basemapControl = {
+      "OSM Tiles": osmTiles, // an option to select a basemap (makes more sense if you have multiple basemaps)
+    }
+
+    var adminLayerControl={};
+    var key;
+    var val;
+
+    //Only show layer controls for layers with elements in them
+    //console.log(adminLevels);
+    for (var i = 1; i < adminLevels.length; i++) {
+      if (Object.keys(adminLevels[i].elements._layers).length != 0) {
+        key = adminLevels[i].name;
+        val = adminLevels[i].elements;
+        adminLayerControl[key] = val;
+        //console.log(adminLayerControl);
+      }
+    }
+
+    //On second and subsequent fetch of GeoJSON first remove old layer control element on top right of map
+    //Else an additional one is added.
+    if (layerControl != undefined) {
+      layerControl.remove(mymap);
+    }
+
+    /* 5 */
+    // Add the control component, a layer list with checkboxes for operational layers and radio buttons for basemaps
+    layerControl = L.control.layers( basemapControl, adminLayerControl,{collapsed:false} ).addTo( mymap )
+    //console.log(layerControl);
+
+    //Update layers on new load. Without this on/off the newly loaded element won't be on the layer.
+    //Very awkward solution! There must be some update functionality!
+    for (let i = 1; i < adminLevels.length; i++) {
+      if (mymap.hasLayer(adminLevels[i].elements)==false) { //check if layer is not activated
+        console.log("Layer was NOT activated!");
+        mymap.addLayer(adminLevels[i].elements); //tick layer
+        mymap.removeLayer(adminLevels[i].elements); //untick layer
+      }
+    }
+  }
+
+  //Apply standard colors to the polygons
+  //(each object or "feature" is computed by this function)
+  function style() {
+    //color = feature.properties.fill; 
+    //console.log(color);
+    return {"fillColor": undefined, "opacity": 1, "fillOpacity": 0.7, "color": "#555555", "weight": 2};
+  }
+
+  //1. Assign each feature to a layer depending on its admin_level
+  //2. Add each OSM relation id to an array to make sure, that this polygon isn't downloaded on subsequent fetches
+  //(each object or "feature" is computed by this function)
+  function onEachFeature(feature, layer) {
+    //bind click
+    layer.on('click', function (e) {
+      layer.setStyle({fillColor: "red"});
+      //e=event
+      //console.log(e);
+      //console.log(layer.feature.geometry);
+    });
+
+    //add GeoJSON elements to layer
+    //var admin_level = feature.properties.admin_level;
+    var admin_level = feature.properties.tags.admin_level; //subelement "tags" only for geojson from overpass api.
+
+    switch (admin_level) {
+      case "1": adminLevels[admin_level].elements.addLayer( layer ); break; //add polygon to adminLevels[0]
+      case "2": adminLevels[admin_level].elements.addLayer( layer ); break;
+      case "3": adminLevels[admin_level].elements.addLayer( layer ); break;
+      case "4": adminLevels[admin_level].elements.addLayer( layer ); break;
+      case "5": adminLevels[admin_level].elements.addLayer( layer ); break;
+      case "6": adminLevels[admin_level].elements.addLayer( layer ); break;
+      case "7": adminLevels[admin_level].elements.addLayer( layer ); break;
+      case "8": adminLevels[admin_level].elements.addLayer( layer ); break;
+      case "9": adminLevels[admin_level].elements.addLayer( layer ); break;
+      case "10": adminLevels[admin_level].elements.addLayer( layer ); break;
+      case "11": adminLevels[admin_level].elements.addLayer( layer ); break;
+    }
+
+    //Write all relation id's into an array
+
+    //for local GeoJSON
+    //var osmId = feature.properties["@id"];
+    //osmId = osmId.replace( /^\D+/g, '');
+    //console.log(osmId);
+    //osmIdsArray.push(osmId);
+
+    //for GeoJSON's from overpass and osmtogeojson
+    var osmId = feature.properties.id;
+
+    if (osmIdsArray.includes(osmId)==false) {
+      osmIdsArray.push(osmId);
+    }
+    //console.log(osmIdsArray);
+  }
+
+  //Filter out all the label points from GeoJSON so the map doesn't look so messy
+  //(each object or "feature" is computed by this function)
+  function filterPoints(layer) {
+    //console.log(layer);
+
+    if (layer.geometry.type != "Point") {
+      //console.log(layer);
+      return true; //Show all elements which are NOT of type "Point"
+    }
+  }
+
+  //get the s,w,n,e cordinates of the current map section and write it to bbox variable
+  function getBboxCoordinates() {
+  console.log("Current zoom level: " +mymap.getZoom());
+  var bounds = mymap.getBounds();
+  var bbox = bounds.getSouthWest().lat + ',' +
+             bounds.getSouthWest().lng + ',' +
+             bounds.getNorthEast().lat + ',' +
+             bounds.getNorthEast().lng;
+  return bbox;
+  console.log("bbox: " +bbox);
+}
+
+  //test: toggle layer 6
+  function hideShowLayer() {
+    //console.log(mymap.hasLayer(layerAdminL6));
+    if (mymap.hasLayer(adminLevels[6].elements)==true) {
+      mymap.removeLayer(adminLevels[6].elements);
+    } else {
+      mymap.addLayer(adminLevels[6].elements);
+    }
+  }
+
+  //test to see if program logs click on layer checkbox
+  adminLevels[6].elements.on("add",function(){
+    console.log("Layer 6 checkbox has been activated!");
+  });
+
+  //Test: Select/deselect all. Just used in a early trial. Can be deleted later
   function selectAll() {
     var allcheckboxes = document.getElementsByName("admin-levels");
     var allseldesel = document.getElementById("all-sel");
