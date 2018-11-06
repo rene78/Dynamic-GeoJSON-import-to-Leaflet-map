@@ -5,28 +5,36 @@
   <title>Load GeoJSON from Wikipedia dynamically</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
-    #map {
+    .container {
+      position: relative;
       width: 500px;
       height: 500px;
     }
+
+    #map {
+      /* position: relative;
+      z-index: -1;*/
+      width: 100%;
+      height: 100%;
+    }
+
     #map.faded {
       opacity: .3;
+      transition: opacity 1s;
     }
-    #zoom-in {
-      /* text-align: center;
-      vertical-align: middle;
-      line-height: 500px; */
 
-      /* position: fixed;
-      width: 50%;
-      left: 50%;
-      top: 40px;
-      text-align: center; */
+    #zoom-in {
+      position: absolute;
+      left: 0;
+      top: 10%;
+      width: 100%;
+      text-align: center;
       font-size: 25px;
       font-weight: bold;
-      pointer-events: none;
-      opacity: .5;
+      opacity: .6;
+      pointer-events: none; /*Makes sure, that map still can be panned and zoomed even if mouse hovers over text */
     }
+
    .hide {
       display: none;
     }
@@ -41,8 +49,10 @@
   <script src='osmtogeojson.js'></script>
 </head>
 <body>
-<div id="map"></div>
-<div id='zoom-in' class='hide'>Zoom in closer to load boundaries</div>
+<div class="container">
+  <div id="map"></div>
+  <div id='zoom-in' class='hide'>Zoom in to load boundaries</div>
+</div>
 <!-- <input type="button" value="Load 1st GeoJSON" onclick="showGeoJson(firstGeoJson)"> -->
 <!-- <input type="button" value="Load Baden GeoJSON" onclick="showGeoJson(BadenKomplett)"> -->
 <!-- <input type="button" value="Toggle layer 6" onclick="hideShowLayer()"> -->
@@ -12851,6 +12861,22 @@
   console.log("bbox: " +bbox);
 }
 
+  //Check current zoom level of map and grey it out with message, if zoom level < 7
+  mymap.on('zoom', function(e) { // e is an event object (MouseEvent in this case)
+    var currentZoomLevel = mymap.getZoom();
+    var map = document.getElementById("map");
+    var infoText = document.getElementById("zoom-in");
+    if (currentZoomLevel < 7) {
+      // console.log("Zoom level below 7");
+      map.classList.add("faded");
+      infoText.classList.remove("hide");
+    } else {
+      // console.log("Zoom level >= 7");
+      map.classList.remove("faded");
+      infoText.classList.add("hide");
+    }
+  });
+
   //test: toggle layer 6
   function hideShowLayer() {
 
@@ -12887,6 +12913,7 @@
     var infoText = document.getElementById("zoom-in");
     infoText.classList.toggle("hide");
   }
+
 </script>
 
 </body>
