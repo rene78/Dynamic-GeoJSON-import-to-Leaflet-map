@@ -5,38 +5,72 @@
   <title>Load GeoJSON from Wikipedia dynamically</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
-    .container {
+    #container {
       position: relative;
       width: 500px;
       height: 500px;
     }
 
+    .grey-blur {
+      filter: grayscale(100%) blur(1px);
+    }
+
     #map {
-      /* position: relative;
-      z-index: -1;*/
+      /* position: relative;*/
+      /* z-index: -1; */
       width: 100%;
       height: 100%;
     }
 
-    #map.faded {
+    /* #map.faded {
       opacity: .3;
       transition: opacity 1s;
-    }
+    } */
 
     #zoom-in {
       position: absolute;
       left: 0;
-      top: 10%;
+      top: 0;
       width: 100%;
       text-align: center;
       font-size: 25px;
       font-weight: bold;
+      color: white;
       opacity: .6;
+      background-color: red;
+      z-index: 444;
       pointer-events: none; /*Makes sure, that map still can be panned and zoomed even if mouse hovers over text */
     }
 
-   .hide {
-      display: none;
+    .hide {
+        display: none;
+      }
+
+    #loading-animation {
+      position: absolute;
+      left: calc(50% - 46px);
+      top: 40%;
+      /* z-index: 1; */
+
+      border: 16px solid #f3f3f3;
+      border-radius: 50%;
+      border-top: 16px solid #3498db;
+      width: 60px;
+      height: 60px;
+      -webkit-animation: spin 2s linear infinite; /* Safari */
+      animation: spin 2s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    #load-button {
+      position: absolute;
+      bottom: 20px;
+      left: 10px;
+      z-index: 444;
     }
 
   </style>
@@ -49,16 +83,21 @@
   <script src='osmtogeojson.js'></script>
 </head>
 <body>
-<div class="container">
+<div id="container">
   <div id="map"></div>
-  <div id='zoom-in' class='hide'>Zoom in to load boundaries</div>
+  <div id="zoom-in" class="hide">Zoom in to load boundaries</div>
+  <input type="button" value="Grey out map" onclick="greyOut()">
+  <input type="button" value="Show zoom level" onclick="getBboxCoordinates()">
+  <input type="button" id="load-button" value="Load GeoJSON from Overpass" onclick="fetchExternalGeojson()">
+  <div id="loading-animation" class="hide"></div>
 </div>
 <!-- <input type="button" value="Load 1st GeoJSON" onclick="showGeoJson(firstGeoJson)"> -->
 <!-- <input type="button" value="Load Baden GeoJSON" onclick="showGeoJson(BadenKomplett)"> -->
 <!-- <input type="button" value="Toggle layer 6" onclick="hideShowLayer()"> -->
-<input type="button" value="Grey out map" onclick="greyOut()">
+
+<!-- <input type="button" value="Grey out map" onclick="greyOut()">
 <input type="button" value="Show zoom level" onclick="getBboxCoordinates()">
-<input type="button" value="Load GeoJSON from Overpass" onclick="fetchExternalGeojson()">
+<input type="button" value="Load GeoJSON from Overpass" onclick="fetchExternalGeojson()"> -->
 <br>
 
 <!-- <input type="checkbox" name="all-sel" id = "all-sel" value="0" checked onclick="selectAll()"> Select/Deselect all<br>
@@ -12864,20 +12903,20 @@
   //Check current zoom level of map and grey it out with message, if zoom level < 7
   mymap.on('zoom', function(e) { // e is an event object (MouseEvent in this case)
     var currentZoomLevel = mymap.getZoom();
-    var map = document.getElementById("map");
+    // var map = document.getElementById("map");
     var infoText = document.getElementById("zoom-in");
     if (currentZoomLevel < 7) {
       // console.log("Zoom level below 7");
-      map.classList.add("faded");
+      // map.classList.add("faded");
       infoText.classList.remove("hide");
     } else {
       // console.log("Zoom level >= 7");
-      map.classList.remove("faded");
+      // map.classList.remove("faded");
       infoText.classList.add("hide");
     }
   });
 
-  //test: toggle layer 6
+  //Test: toggle layer 6
   function hideShowLayer() {
 
     //console.log(mymap.hasLayer(adminLevels[6].features));
@@ -12889,7 +12928,7 @@
 
   }
 
-  //test to see if program logs click on layer checkbox
+  //Test to see if program logs click on layer checkbox
   adminLevels[6].features.on("add",function() {
     console.log("Layer 6 checkbox has been activated!");
   });
@@ -12907,11 +12946,24 @@
   //Test to see, if map is greyed out
   function greyOut() {
     //grey/show map
+    //var map = document.querySelector("container");
     var map = document.getElementById("map");
-    map.classList.toggle("faded");
+    map.classList.toggle("grey-blur");
+    var button = document.getElementById("load-button");
+    button.classList.toggle("grey-blur");
+    //make sure that button cannot be clicked anymore
+    if (button.disabled==false) {
+      button.disabled=true;
+    } else {
+      button.disabled=false;
+    }
+    //show/hide loading animation
+    var animation = document.getElementById("loading-animation");
+    animation.classList.toggle("hide");
+
     //show/hide text
-    var infoText = document.getElementById("zoom-in");
-    infoText.classList.toggle("hide");
+    // var infoText = document.getElementById("zoom-in");
+    // infoText.classList.toggle("hide");
   }
 
 </script>
